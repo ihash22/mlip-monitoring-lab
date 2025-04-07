@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   prometheus:
@@ -8,22 +8,27 @@ services:
       - ./prometheus/:/etc/prometheus/
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
-    expose:
-      - 9090
     ports:
       - 9090:9090
+    networks:
+      - monitoring
 
   node-exporter:
     image: quay.io/prometheus/node-exporter:latest
     container_name: nodeexporter
     ports:
       - 9100:9100
-    expose:
-      - 9100
+    networks:
+      - monitoring
 
   grafana:
     image: grafana/grafana-oss:latest
     container_name: grafana
     ports:
       - 3000:3000
+    networks:
+      - monitoring
 
+networks:
+  monitoring:
+    driver: bridge

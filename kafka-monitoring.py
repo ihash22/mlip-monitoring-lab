@@ -8,10 +8,15 @@ start_http_server(8765)
 
 # Metrics like Counter, Gauge, Histogram, Summaries
 # Refer https://prometheus.io/docs/concepts/metric_types/ for details of each metric
-# TODO: Define metrics to show request count. Request count is total number of requests made with a particular http status
+# Define metrics to show request count. Request count is total number of requests made with a particular HTTP status.
 REQUEST_COUNT = Counter(
     'request_count', 'Recommendation Request Count',
     ['http_status']
+)
+
+# Define a separate counter for requests with HTTP status 200
+REQUEST_COUNT_200 = Counter(
+    'request_count_200', 'Count of Requests Returning HTTP 200'
 )
 
 REQUEST_LATENCY = Histogram('request_latency_seconds', 'Request latency')
@@ -31,22 +36,19 @@ def main():
         event = message.value.decode('utf-8')
         values = event.split(',')
         if 'recommendation request' in values[2]:
-            # TODO: Increment the request count metric for the appropriate HTTP status code.
-            # Hint: Extract the status code from the message and use it as a label for the metric.
-            # print(values) - You can print values and see how to get the status
-            #
-            
-            # status = Eg. 200,400 etc
+            # Extract the status code from the message and use it as a label for the metric.
             status = values[3].split(" ")[1]
-            # REQUEST_COUNT.?(status).inc()
             REQUEST_COUNT.labels(status).inc()
+
+            # Increment the counter for HTTP 200 responses if applicable
+            if status == "200":
+                REQUEST_COUNT_200.inc()
 
             # Updating request latency histogram
             time_taken = float(values[-1].strip().split(" ")[0])
             REQUEST_LATENCY.observe(time_taken / 1000)
 
             print(event)
-
 
 
 if __name__ == "__main__":
