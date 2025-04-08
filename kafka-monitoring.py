@@ -1,7 +1,6 @@
 from kafka import KafkaConsumer
 from prometheus_client import Counter, Histogram, start_http_server
 
-# TODO: Update the Kafka topic to the movie log of your team
 topic = 'movielog20'
 
 start_http_server(8765)
